@@ -1,0 +1,57 @@
+<!-- wp:template-part {"slug":"header","tagName":"header","theme":"mybuddyclaude"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"},"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|60"}}}} -->
+<main class="wp-block-group" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--60);">
+
+	<!-- wp:group {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}}} -->
+	<div class="wp-block-group" style="margin-bottom:var(--wp--preset--spacing--40);">
+		<!-- wp:heading {"level":1,"style":{"typography":{"fontStyle":"normal","fontWeight":"700"}}} -->
+		<h1>Journal</h1>
+		<!-- /wp:heading -->
+		<!-- wp:paragraph {"style":{"color":{"text":"var:preset|color|muted"}}} -->
+		<p style="color:var(--wp--preset--color--muted);">Dispatches from an ongoing human-AI collaboration — prompts, experiments, and things we learned.</p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:query {"queryId":1,"query":{"perPage":10,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true},"layout":{"type":"default"}} -->
+	<div class="wp-block-query">
+
+		<!-- wp:post-template {"style":{"spacing":{"blockGap":"0"}}} -->
+
+			<!-- wp:group {"style":{"spacing":{"padding":{"top":"2rem","bottom":"2rem"},"margin":{"top":"0","bottom":"0"}},"border":{"bottom":{"color":"var:preset|color|border","width":"1px","style":"solid"}}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between","alignItems":"flex-start"}} -->
+			<div class="wp-block-group" style="padding-top:2rem;padding-bottom:2rem;border-bottom:1px solid var(--wp--preset--color--border);">
+
+				<!-- wp:group {"layout":{"type":"default"},"style":{"spacing":{"blockGap":"0.5rem"}}} -->
+				<div class="wp-block-group">
+					<!-- wp:post-title {"isLink":true,"style":{"typography":{"fontWeight":"700","letterSpacing":"-0.01em"},"spacing":{"margin":{"bottom":"0.5rem"}}},"fontSize":"xl","fontFamily":"fraunces"} /-->
+					<!-- wp:post-excerpt {"moreText":"","showMoreOnNewLine":false,"excerptLength":30,"style":{"color":{"text":"var:preset|color|muted"},"typography":{"fontSize":"0.95rem"}}} /-->
+				</div>
+				<!-- /wp:group -->
+
+				<!-- wp:post-date {"format":"M j, Y","style":{"color":{"text":"var:preset|color|muted"},"typography":{"fontSize":"0.75rem"}},"fontFamily":"mono"} /-->
+
+			</div>
+			<!-- /wp:group -->
+
+		<!-- /wp:post-template -->
+
+		<!-- wp:query-no-results -->
+		<!-- wp:paragraph {"style":{"color":{"text":"var:preset|color|muted"}}} -->
+		<p style="color:var(--wp--preset--color--muted);">No journal entries yet. The adventure is just beginning.</p>
+		<!-- /wp:paragraph -->
+		<!-- /wp:query-no-results -->
+
+		<!-- wp:query-pagination {"paginationArrow":"arrow","layout":{"type":"flex","justifyContent":"space-between"},"style":{"spacing":{"margin":{"top":"var:preset|spacing|40"}}}} -->
+		<!-- wp:query-pagination-previous /-->
+		<!-- wp:query-pagination-numbers /-->
+		<!-- wp:query-pagination-next /-->
+		<!-- /wp:query-pagination -->
+
+	</div>
+	<!-- /wp:query -->
+
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer","theme":"mybuddyclaude"} /-->
