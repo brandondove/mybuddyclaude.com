@@ -1,0 +1,181 @@
+# WordPress .gitignore Template
+# Ignore everything by default, then whitelist specific items
+# This approach ensures only intentional files are tracked
+
+# ==============================================
+# IGNORE EVERYTHING BY DEFAULT
+# ==============================================
+/*
+
+# ==============================================
+# WHITELIST ESSENTIAL FILES
+# ==============================================
+!.gitignore
+
+# ==============================================
+# WHITELIST CUSTOM CONTENT
+# ==============================================
+
+# Custom themes directory
+!wp-content/
+wp-content/*
+!wp-content/themes/
+wp-content/themes/*
+
+# Custom plugins directory
+!wp-content/plugins/
+wp-content/plugins/*
+
+# Must-use plugins (mu-plugins)
+!wp-content/mu-plugins/
+wp-content/mu-plugins/*
+
+# ==============================================
+# WHITELIST PROJECT FILES
+# ==============================================
+
+# Package management
+!composer.json
+!composer.lock
+!package.json
+!package-lock.json
+!yarn.lock
+
+# Build tools
+!webpack.config.js
+!gulpfile.js
+!Gruntfile.js
+!rollup.config.js
+!vite.config.js
+
+# Environment and configuration
+!.env.example
+!.env.local.example
+!.editorconfig
+!.eslintrc*
+!.prettierrc*
+!.stylelintrc*
+
+# Docker
+!docker-compose.yml
+!docker-compose.yaml
+!Dockerfile
+!.dockerignore
+
+# CI/CD
+!.github/
+!.gitlab-ci.yml
+!.travis.yml
+!.circleci/
+
+# ==============================================
+# ALWAYS IGNORE (SECURITY & PERFORMANCE)
+# ==============================================
+
+# WordPress core (always ignore)
+/wp-admin/
+/wp-includes/
+
+# Security - Never commit these
+wp-config.php
+.env
+.env.local
+.env.production
+
+# Database dumps
+*.sql
+*.sqlite
+
+# Log files
+*.log
+error_log
+debug.log
+
+# Uploads and cache
+wp-content/uploads/
+wp-content/cache/
+wp-content/backup*/
+wp-content/backups/
+wp-content/upgrade/
+wp-content/w3tc*/
+
+# Plugin cache and temporary files
+wp-content/advanced-cache.php
+wp-content/wp-cache-config.php
+wp-content/cache/
+wp-content/object-cache.php
+
+# ==============================================
+# SYSTEM & DEVELOPMENT FILES
+# ==============================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.settings/
+nbproject/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ==============================================
+# EXAMPLE WHITELISTING RULES
+# ==============================================
+
+# Whitelist specific custom themes
+# Uncomment and modify the lines below for your custom themes
+# !wp-content/themes/your-custom-theme/
+
+# Whitelist specific custom plugins
+# Uncomment and modify the lines below for your custom plugins
+# !wp-content/plugins/your-custom-plugin/
+
+# Whitelist specific custom mu-plugins
+# !wp-content/mu-plugins/your-mu-plugin.php
+# !wp-content/mu-plugins/your-mu-plugin-folder/
+
+# Custom uploads (be very careful with this)
+# !wp-content/uploads/
+# wp-content/uploads/*
+# !wp-content/uploads/custom-assets/
+
+# Custom directories in wp-content
+# !wp-content/your-custom-folder/
+
+# ==============================================
+# USAGE INSTRUCTIONS
+# ==============================================
+
+# 1. Copy this file to your WordPress project root as '.gitignore'
+# 2. Create whitelist rules for your use case below
+# 3. Remember, never commit wp-config.php with actual credentials - use environment variables instead!
+
+!wp-content/themes/mybuddyclaude/
