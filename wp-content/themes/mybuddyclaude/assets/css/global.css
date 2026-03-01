@@ -341,6 +341,108 @@ code:not(.wp-block-code code) {
 }
 
 /* =============================================================
+   Artifact callout
+   ============================================================= */
+
+.mbc-artifact {
+	position: relative;
+	border: 1px solid var(--wp--preset--color--border);
+	border-radius: 12px;
+	background: var(--wp--preset--color--base);
+	overflow: hidden;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mbc-artifact:hover {
+	border-color: var(--wp--preset--color--accent);
+	box-shadow: 0 4px 24px rgba(232, 69, 10, 0.08);
+}
+
+.mbc-artifact__header {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.75rem 1.25rem;
+	border-bottom: 1px solid var(--wp--preset--color--border);
+	background: var(--wp--preset--color--surface);
+}
+
+.mbc-artifact__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	flex-shrink: 0;
+	color: var(--wp--preset--color--accent);
+}
+
+.mbc-artifact__icon svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.mbc-artifact__title {
+	font-family: var(--wp--preset--font-family--jakarta);
+	font-size: var(--wp--preset--font-size--sm);
+	font-weight: 600;
+	color: var(--wp--preset--color--contrast);
+	margin: 0;
+	line-height: 1.3;
+}
+
+.mbc-artifact__type {
+	margin-left: auto;
+	font-family: var(--wp--preset--font-family--mono);
+	font-size: 0.65rem;
+	font-weight: 500;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--muted);
+}
+
+.mbc-artifact__body {
+	padding: 1.25rem;
+}
+
+.mbc-artifact__body p {
+	font-size: var(--wp--preset--font-size--sm);
+	line-height: 1.6;
+	color: var(--wp--preset--color--muted);
+	margin: 0 0 1rem;
+}
+
+.mbc-artifact__body p:last-child {
+	margin-bottom: 0;
+}
+
+.mbc-artifact__action {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-family: var(--wp--preset--font-family--jakarta);
+	font-size: var(--wp--preset--font-size--sm);
+	font-weight: 600;
+	color: var(--wp--preset--color--accent);
+	text-decoration: none;
+	transition: gap 0.15s ease;
+}
+
+.mbc-artifact__action:hover {
+	gap: 0.75rem;
+}
+
+.mbc-artifact__action svg {
+	width: 1rem;
+	height: 1rem;
+	transition: transform 0.15s ease;
+}
+
+.mbc-artifact__action:hover svg {
+	transform: translateX(2px);
+}
+
+/* =============================================================
    Responsive
    ============================================================= */
 
