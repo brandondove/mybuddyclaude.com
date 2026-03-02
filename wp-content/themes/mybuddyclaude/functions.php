@@ -46,25 +46,13 @@ add_action( 'after_setup_theme', 'mybuddyclaude_setup' );
  * Enqueue Google Fonts.
  */
 function mybuddyclaude_enqueue_fonts(): void {
-	$font_url = 'https://fonts.googleapis.com/css2?' . http_build_query(
-		array(
-			'family'  => implode(
-				'|',
-				array(
-					'Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600',
-					'Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400',
-					'JetBrains+Mono:wght@400;500',
-				)
-			),
-			'display' => 'swap',
-		)
-	);
+	$font_url = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap';
 
 	wp_enqueue_style(
 		'mybuddyclaude-fonts',
 		$font_url,
 		array(),
-		wp_get_theme()->get( 'Version' )
+		null
 	);
 }
 add_action( 'wp_enqueue_scripts', 'mybuddyclaude_enqueue_fonts' );
