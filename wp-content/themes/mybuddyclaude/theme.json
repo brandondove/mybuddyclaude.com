@@ -132,8 +132,13 @@
 			"textTransform": true
 		},
 		"spacing": {
+			"defaultSpacingSizes": false,
 			"spacingScale": {
-				"steps": 0
+				"steps": 0,
+				"operator": "*",
+				"increment": 1.5,
+				"mediumStep": 1.5,
+				"unit": "rem"
 			},
 			"spacingSizes": [
 				{ "slug": "10", "size": "0.5rem",  "name": "XS" },
@@ -182,8 +187,8 @@
 		"spacing": {
 			"blockGap": "var(--wp--preset--spacing--30)",
 			"padding": {
-				"left": "var(--wp--preset--spacing--20)",
-				"right": "var(--wp--preset--spacing--20)"
+				"left": "var(--wp--preset--spacing--30)",
+				"right": "var(--wp--preset--spacing--30)"
 			}
 		},
 		"elements": {
