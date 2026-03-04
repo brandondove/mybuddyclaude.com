@@ -168,20 +168,30 @@ add_action( 'init', 'mybuddyclaude_register_taxonomies' );
  */
 function mybuddyclaude_register_tool_meta(): void {
 	$meta_fields = array(
-		'mbc_tool_url'    => 'string',
-		'mbc_tool_status' => 'string',
-		'mbc_tool_tech'   => 'string',
+		'mbc_tool_url'    => array(
+			'type'              => 'string',
+			'sanitize_callback' => 'esc_url_raw',
+		),
+		'mbc_tool_status' => array(
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
+		'mbc_tool_tech'   => array(
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+		),
 	);
 
-	foreach ( $meta_fields as $key => $type ) {
+	foreach ( $meta_fields as $key => $config ) {
 		register_post_meta(
 			'mbc_tool',
 			$key,
 			array(
-				'show_in_rest'  => true,
-				'single'        => true,
-				'type'          => $type,
-				'auth_callback' => fn() => current_user_can( 'edit_posts' ),
+				'show_in_rest'      => true,
+				'single'            => true,
+				'type'              => $config['type'],
+				'sanitize_callback' => $config['sanitize_callback'],
+				'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
 			)
 		);
 	}
