@@ -435,7 +435,7 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 	foreach ( $schemas as $schema ) {
 		printf(
 			'<script type="application/ld+json">%s</script>' . "\n",
-			wp_json_encode( $schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE )
+			wp_json_encode( $schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG )
 		);
 	}
 }
