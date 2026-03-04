@@ -15,8 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Output the GA4 gtag.js snippet in the document head.
  *
- * Only loads on production (wp_get_environment_type() === 'production')
- * and skips admin pages.
+ * Only loads on production (wp_get_environment_type() === 'production').
+ * Skips admin pages and logged-in users with edit_posts capability
+ * (contributor role and above) to avoid skewing analytics.
  */
 function mbc_google_analytics_head(): void {
 	if ( is_admin() ) {
@@ -24,6 +25,10 @@ function mbc_google_analytics_head(): void {
 	}
 
 	if ( wp_get_environment_type() !== 'production' ) {
+		return;
+	}
+
+	if ( current_user_can( 'edit_posts' ) ) {
 		return;
 	}
 
