@@ -162,6 +162,7 @@ yarn-error.log*
 # !wp-content/mu-plugins/your-mu-plugin.php
 # !wp-content/mu-plugins/your-mu-plugin-folder/
 !wp-content/mu-plugins/mbc-google-analytics.php
+!wp-content/mu-plugins/mbc-seo.php
 
 # Custom uploads (be very careful with this)
 # !wp-content/uploads/
