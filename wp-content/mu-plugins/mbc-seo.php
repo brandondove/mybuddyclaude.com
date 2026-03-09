@@ -39,6 +39,26 @@ function mbc_seo_get_context(): array {
 		$ctx['title']       = $ctx['site_name'];
 		$ctx['description'] = get_bloginfo( 'description' );
 		$ctx['url']         = home_url( '/' );
+
+		$front_page_id = (int) get_option( 'page_on_front' );
+		if ( $front_page_id > 0 ) {
+			$front_page  = get_post( $front_page_id );
+			$ctx['post'] = $front_page;
+			mbc_seo_set_image( $ctx, $front_page_id );
+		}
+
+		return $ctx;
+	}
+
+	if ( is_home() ) {
+		$posts_page = get_queried_object();
+		if ( $posts_page instanceof WP_Post ) {
+			$ctx['title']       = get_the_title( $posts_page );
+			$ctx['description'] = mbc_seo_get_description_for_post( $posts_page );
+			$ctx['url']         = get_permalink( $posts_page );
+			$ctx['post']        = $posts_page;
+			mbc_seo_set_image( $ctx, $posts_page->ID );
+		}
 		return $ctx;
 	}
 
@@ -53,20 +73,7 @@ function mbc_seo_get_context(): array {
 			$ctx['og_type'] = 'article';
 		}
 
-		$thumbnail_id = get_post_thumbnail_id( $post );
-		if ( $thumbnail_id ) {
-			$image_url = wp_get_attachment_image_url( (int) $thumbnail_id, 'full' );
-			if ( $image_url ) {
-				$ctx['image_url'] = $image_url;
-				$image_meta       = wp_get_attachment_metadata( (int) $thumbnail_id );
-				if ( is_array( $image_meta ) ) {
-					$ctx['image_width']  = (int) ( $image_meta['width'] ?? 0 );
-					$ctx['image_height'] = (int) ( $image_meta['height'] ?? 0 );
-				}
-				$alt = get_post_meta( (int) $thumbnail_id, '_wp_attachment_image_alt', true );
-				$ctx['image_alt'] = is_string( $alt ) && $alt !== '' ? $alt : $ctx['title'];
-			}
-		}
+		mbc_seo_set_image( $ctx, $post->ID );
 
 		return $ctx;
 	}
@@ -92,6 +99,33 @@ function mbc_seo_get_context(): array {
 	$ctx['description'] = get_bloginfo( 'description' );
 	$ctx['url']         = home_url( '/' );
 	return $ctx;
+}
+
+/**
+ * Populate the image fields in the SEO context from a post's featured image.
+ *
+ * @param array $ctx  SEO context array (passed by reference).
+ * @param int   $post_id Post ID to look up the thumbnail for.
+ */
+function mbc_seo_set_image( array &$ctx, int $post_id ): void {
+	$thumbnail_id = get_post_thumbnail_id( $post_id );
+	if ( ! $thumbnail_id ) {
+		return;
+	}
+
+	$image_url = wp_get_attachment_image_url( (int) $thumbnail_id, 'full' );
+	if ( ! $image_url ) {
+		return;
+	}
+
+	$ctx['image_url'] = $image_url;
+	$image_meta       = wp_get_attachment_metadata( (int) $thumbnail_id );
+	if ( is_array( $image_meta ) ) {
+		$ctx['image_width']  = (int) ( $image_meta['width'] ?? 0 );
+		$ctx['image_height'] = (int) ( $image_meta['height'] ?? 0 );
+	}
+	$alt              = get_post_meta( (int) $thumbnail_id, '_wp_attachment_image_alt', true );
+	$ctx['image_alt'] = is_string( $alt ) && '' !== $alt ? $alt : $ctx['title'];
 }
 
 /**
