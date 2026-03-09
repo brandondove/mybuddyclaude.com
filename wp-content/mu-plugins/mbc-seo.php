@@ -208,12 +208,12 @@ function mbc_seo_output_meta_description( array $ctx ): void {
  */
 function mbc_seo_output_open_graph( array $ctx ): void {
 	$tags = array(
-		'og:locale'     => str_replace( '-', '_', get_bloginfo( 'language' ) ),
-		'og:site_name'  => $ctx['site_name'],
-		'og:type'       => $ctx['og_type'],
-		'og:title'      => $ctx['title'],
+		'og:locale'      => str_replace( '-', '_', get_bloginfo( 'language' ) ),
+		'og:site_name'   => $ctx['site_name'],
+		'og:type'        => $ctx['og_type'],
+		'og:title'       => $ctx['title'],
 		'og:description' => $ctx['description'],
-		'og:url'        => $ctx['url'],
+		'og:url'         => $ctx['url'],
 	);
 
 	foreach ( $tags as $property => $content ) {
