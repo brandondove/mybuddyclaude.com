@@ -4,6 +4,8 @@
  * Description: Outputs meta description, Open Graph tags, Twitter Card tags, and JSON-LD structured data.
  * Version: 1.0.0
  * Author: My Buddy Claude
+ *
+ * @package MBC_SEO
  */
 
 declare( strict_types=1 );
@@ -103,7 +105,7 @@ function mbc_seo_get_context(): array {
 	if ( is_post_type_archive( 'mbc_tool' ) ) {
 		$ctx['title']       = post_type_archive_title( '', false );
 		$ctx['description'] = 'A curated showcase of tools built through human-AI collaboration.';
-		$ctx['url']         = get_post_type_archive_link( 'mbc_tool' ) ?: home_url( '/' );
+		$ctx['url']         = get_post_type_archive_link( 'mbc_tool' ) ? get_post_type_archive_link( 'mbc_tool' ) : home_url( '/' );
 		return $ctx;
 	}
 
@@ -117,7 +119,7 @@ function mbc_seo_get_context(): array {
 /**
  * Populate the image fields in the SEO context from a post's featured image.
  *
- * @param array $ctx  SEO context array (passed by reference).
+ * @param array $ctx     SEO context array (passed by reference).
  * @param int   $post_id Post ID to look up the thumbnail for.
  */
 function mbc_seo_set_image( array &$ctx, int $post_id ): void {
@@ -143,14 +145,17 @@ function mbc_seo_set_image( array &$ctx, int $post_id ): void {
 
 /**
  * Derive a meta description from a post's excerpt or content.
+ *
+ * @param WP_Post $post The post object.
+ * @return string
  */
 function mbc_seo_get_description_for_post( WP_Post $post ): string {
-	if ( $post->post_excerpt !== '' ) {
+	if ( '' !== $post->post_excerpt ) {
 		return wp_strip_all_tags( $post->post_excerpt );
 	}
 
 	$content = $post->post_content;
-	if ( $content === '' ) {
+	if ( '' === $content ) {
 		return '';
 	}
 
@@ -159,7 +164,7 @@ function mbc_seo_get_description_for_post( WP_Post $post ): string {
 	$content = wp_strip_all_tags( (string) $content );
 	$content = trim( $content );
 
-	if ( $content === '' ) {
+	if ( '' === $content ) {
 		return '';
 	}
 
@@ -175,11 +180,13 @@ function mbc_seo_get_description_for_post( WP_Post $post ): string {
 
 /**
  * Derive a meta description for taxonomy archive pages.
+ *
+ * @return string
  */
 function mbc_seo_get_archive_description(): string {
 	$term = get_queried_object();
 
-	if ( $term instanceof WP_Term && $term->description !== '' ) {
+	if ( $term instanceof WP_Term && '' !== $term->description ) {
 		return wp_strip_all_tags( $term->description );
 	}
 
@@ -200,7 +207,7 @@ function mbc_seo_get_archive_description(): string {
  * @param array $ctx SEO context from mbc_seo_get_context().
  */
 function mbc_seo_output_meta_description( array $ctx ): void {
-	if ( $ctx['description'] === '' ) {
+	if ( '' === $ctx['description'] ) {
 		return;
 	}
 
@@ -230,7 +237,7 @@ function mbc_seo_output_open_graph( array $ctx ): void {
 	);
 
 	foreach ( $tags as $property => $content ) {
-		if ( $content === '' ) {
+		if ( '' === $content ) {
 			continue;
 		}
 		printf(
@@ -240,7 +247,7 @@ function mbc_seo_output_open_graph( array $ctx ): void {
 		);
 	}
 
-	if ( $ctx['image_url'] !== '' ) {
+	if ( '' !== $ctx['image_url'] ) {
 		printf(
 			'<meta property="og:image" content="%s" />' . "\n",
 			esc_url( $ctx['image_url'] )
@@ -248,11 +255,11 @@ function mbc_seo_output_open_graph( array $ctx ): void {
 		if ( $ctx['image_width'] > 0 && $ctx['image_height'] > 0 ) {
 			printf(
 				'<meta property="og:image:width" content="%d" />' . "\n",
-				$ctx['image_width']
+				(int) $ctx['image_width']
 			);
 			printf(
 				'<meta property="og:image:height" content="%d" />' . "\n",
-				$ctx['image_height']
+				(int) $ctx['image_height']
 			);
 		}
 		printf(
@@ -272,28 +279,28 @@ function mbc_seo_output_open_graph( array $ctx ): void {
  * @param array $ctx SEO context from mbc_seo_get_context().
  */
 function mbc_seo_output_twitter_card( array $ctx ): void {
-	$card_type = $ctx['image_url'] !== '' ? 'summary_large_image' : 'summary';
+	$card_type = '' !== $ctx['image_url'] ? 'summary_large_image' : 'summary';
 
 	printf(
 		'<meta name="twitter:card" content="%s" />' . "\n",
 		esc_attr( $card_type )
 	);
 
-	if ( $ctx['title'] !== '' ) {
+	if ( '' !== $ctx['title'] ) {
 		printf(
 			'<meta name="twitter:title" content="%s" />' . "\n",
 			esc_attr( $ctx['title'] )
 		);
 	}
 
-	if ( $ctx['description'] !== '' ) {
+	if ( '' !== $ctx['description'] ) {
 		printf(
 			'<meta name="twitter:description" content="%s" />' . "\n",
 			esc_attr( $ctx['description'] )
 		);
 	}
 
-	if ( $ctx['image_url'] !== '' ) {
+	if ( '' !== $ctx['image_url'] ) {
 		printf(
 			'<meta name="twitter:image" content="%s" />' . "\n",
 			esc_url( $ctx['image_url'] )
@@ -326,8 +333,8 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 		'potentialAction' => array(
 			'@type'       => 'SearchAction',
 			'target'      => array(
-				'@type'        => 'EntryPoint',
-				'urlTemplate'  => home_url( '/?s={search_term_string}' ),
+				'@type'       => 'EntryPoint',
+				'urlTemplate' => home_url( '/?s={search_term_string}' ),
 			),
 			'query-input' => 'required name=search_term_string',
 		),
@@ -362,7 +369,7 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 			),
 		);
 
-		if ( $ctx['image_url'] !== '' ) {
+		if ( '' !== $ctx['image_url'] ) {
 			$article['image'] = array(
 				'@type'  => 'ImageObject',
 				'url'    => $ctx['image_url'],
@@ -376,8 +383,8 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 
 	// SoftwareApplication schema — single tool pages.
 	if ( is_singular( 'mbc_tool' ) && $ctx['post'] instanceof WP_Post ) {
-		$post     = $ctx['post'];
-		$tool_url = get_post_meta( $post->ID, 'mbc_tool_url', true );
+		$post      = $ctx['post'];
+		$tool_url  = get_post_meta( $post->ID, 'mbc_tool_url', true );
 		$tool_tech = get_post_meta( $post->ID, 'mbc_tool_tech', true );
 
 		$tool = array(
@@ -389,15 +396,15 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 			'applicationCategory' => 'WebApplication',
 		);
 
-		if ( is_string( $tool_url ) && $tool_url !== '' ) {
+		if ( is_string( $tool_url ) && '' !== $tool_url ) {
 			$tool['sameAs'] = esc_url_raw( $tool_url );
 		}
 
-		if ( is_string( $tool_tech ) && $tool_tech !== '' ) {
+		if ( is_string( $tool_tech ) && '' !== $tool_tech ) {
 			$tool['keywords'] = sanitize_text_field( $tool_tech );
 		}
 
-		if ( $ctx['image_url'] !== '' ) {
+		if ( '' !== $ctx['image_url'] ) {
 			$tool['image'] = array(
 				'@type'  => 'ImageObject',
 				'url'    => $ctx['image_url'],
