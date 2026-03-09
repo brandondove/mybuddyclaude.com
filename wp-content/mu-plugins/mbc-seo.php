@@ -36,15 +36,28 @@ function mbc_seo_get_context(): array {
 	);
 
 	if ( is_front_page() ) {
-		$ctx['title']       = $ctx['site_name'];
-		$ctx['description'] = get_bloginfo( 'description' );
-		$ctx['url']         = home_url( '/' );
+		$ctx['title'] = $ctx['site_name'];
+		$ctx['url']   = home_url( '/' );
 
 		$front_page_id = (int) get_option( 'page_on_front' );
 		if ( $front_page_id > 0 ) {
 			$front_page  = get_post( $front_page_id );
 			$ctx['post'] = $front_page;
+
+			// Prefer the front page excerpt for a richer meta description.
+			if ( $front_page instanceof WP_Post ) {
+				$excerpt = mbc_seo_get_description_for_post( $front_page );
+				if ( '' !== $excerpt ) {
+					$ctx['description'] = $excerpt;
+				}
+			}
+
 			mbc_seo_set_image( $ctx, $front_page_id );
+		}
+
+		// Fall back to the site tagline.
+		if ( '' === $ctx['description'] ) {
+			$ctx['description'] = get_bloginfo( 'description' );
 		}
 
 		return $ctx;
