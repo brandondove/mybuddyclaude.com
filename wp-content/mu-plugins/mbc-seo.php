@@ -324,6 +324,17 @@ function mbc_seo_output_twitter_card( array $ctx ): void {
 function mbc_seo_output_json_ld( array $ctx ): void {
 	$schemas = array();
 
+	// Organization schema — always output.
+	$schemas[] = array(
+		'@context' => 'https://schema.org',
+		'@type'    => 'Organization',
+		'name'     => $ctx['site_name'],
+		'url'      => home_url( '/' ),
+		'sameAs'   => array(
+			'https://github.com/brandondove/mybuddyclaude.com',
+		),
+	);
+
 	// WebSite schema — always output.
 	$schemas[] = array(
 		'@context'        => 'https://schema.org',
