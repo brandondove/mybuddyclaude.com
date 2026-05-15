@@ -313,6 +313,164 @@ function mbc_seo_output_twitter_card( array $ctx ): void {
 }
 
 // =========================================================================
+// ENTITY IDENTIFIERS & HELPERS
+// =========================================================================
+
+/**
+ * Stable @id for the publishing Organization.
+ *
+ * @return string
+ */
+function mbc_seo_organization_id(): string {
+	return home_url( '/#organization' );
+}
+
+/**
+ * Stable @id for the primary Person (site author).
+ *
+ * @return string
+ */
+function mbc_seo_person_id(): string {
+	return home_url( '/#person-brandon-dove' );
+}
+
+/**
+ * Build the Organization schema node.
+ *
+ * @return array<string,mixed>
+ */
+function mbc_seo_get_organization_schema(): array {
+	$site_name   = get_bloginfo( 'name' );
+	$description = get_bloginfo( 'description' );
+
+	$organization = array(
+		'@context'    => 'https://schema.org',
+		'@type'       => 'Organization',
+		'@id'         => mbc_seo_organization_id(),
+		'name'        => $site_name,
+		'url'         => home_url( '/' ),
+		'description' => $description,
+	);
+
+	$logo = mbc_seo_get_publisher_logo();
+	if ( null !== $logo ) {
+		$organization['logo'] = $logo;
+		// Google's Article rich results expect `image` on the publisher.
+		$organization['image'] = array( '@id' => $logo['@id'] );
+	}
+
+	/**
+	 * Filter the `sameAs` URLs for the Organization schema.
+	 *
+	 * @param string[] $urls List of canonical profile URLs.
+	 */
+	$same_as = apply_filters(
+		'mbc_seo_organization_same_as',
+		array(
+			'https://github.com/brandondove/mybuddyclaude.com',
+		)
+	);
+
+	$same_as = array_values( array_filter( array_map( 'esc_url_raw', (array) $same_as ) ) );
+	if ( ! empty( $same_as ) ) {
+		$organization['sameAs'] = $same_as;
+	}
+
+	return $organization;
+}
+
+/**
+ * Build the ImageObject node for the publisher logo, if a site icon is set.
+ *
+ * @return array<string,mixed>|null
+ */
+function mbc_seo_get_publisher_logo(): ?array {
+	$site_icon_id = (int) get_option( 'site_icon' );
+	if ( $site_icon_id <= 0 ) {
+		return null;
+	}
+
+	$url = wp_get_attachment_image_url( $site_icon_id, 'full' );
+	if ( ! is_string( $url ) || '' === $url ) {
+		return null;
+	}
+
+	$logo = array(
+		'@type' => 'ImageObject',
+		'@id'   => home_url( '/#logo' ),
+		'url'   => $url,
+	);
+
+	$meta = wp_get_attachment_metadata( $site_icon_id );
+	if ( is_array( $meta ) ) {
+		if ( isset( $meta['width'] ) ) {
+			$logo['width'] = (int) $meta['width'];
+		}
+		if ( isset( $meta['height'] ) ) {
+			$logo['height'] = (int) $meta['height'];
+		}
+	}
+
+	return $logo;
+}
+
+/**
+ * Build the Person schema node for the primary site author.
+ *
+ * @return array<string,mixed>
+ */
+function mbc_seo_get_person_schema(): array {
+	$about_url = mbc_seo_get_about_url();
+
+	$person = array(
+		'@context'    => 'https://schema.org',
+		'@type'       => 'Person',
+		'@id'         => mbc_seo_person_id(),
+		'name'        => 'Brandon Dove',
+		'url'         => '' !== $about_url ? $about_url : home_url( '/' ),
+		'jobTitle'    => 'Founder, Pixel Jar',
+		'description' => 'WordPress developer documenting human-AI collaboration in public.',
+		'worksFor'    => array(
+			'@type' => 'Organization',
+			'name'  => 'Pixel Jar',
+			'url'   => 'https://pixeljar.com/',
+		),
+	);
+
+	/**
+	 * Filter the `sameAs` URLs for the primary Person schema.
+	 *
+	 * @param string[] $urls List of canonical profile URLs (social, professional, etc.).
+	 */
+	$same_as = apply_filters(
+		'mbc_seo_person_same_as',
+		array(
+			'https://github.com/brandondove',
+		)
+	);
+
+	$same_as = array_values( array_filter( array_map( 'esc_url_raw', (array) $same_as ) ) );
+	if ( ! empty( $same_as ) ) {
+		$person['sameAs'] = $same_as;
+	}
+
+	return $person;
+}
+
+/**
+ * Get the URL of the About page if it exists.
+ *
+ * @return string
+ */
+function mbc_seo_get_about_url(): string {
+	$about = get_page_by_path( 'about' );
+	if ( $about instanceof WP_Post ) {
+		return (string) get_permalink( $about );
+	}
+	return '';
+}
+
+// =========================================================================
 // OUTPUT: JSON-LD STRUCTURED DATA
 // =========================================================================
 
@@ -325,15 +483,21 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 	$schemas = array();
 
 	// Organization schema — always output.
-	$schemas[] = array(
-		'@context' => 'https://schema.org',
-		'@type'    => 'Organization',
-		'name'     => $ctx['site_name'],
-		'url'      => home_url( '/' ),
-		'sameAs'   => array(
-			'https://github.com/brandondove/mybuddyclaude.com',
-		),
-	);
+	$schemas[] = mbc_seo_get_organization_schema();
+
+	// Person schema — always output so the entity is resolvable from any page.
+	$schemas[] = mbc_seo_get_person_schema();
+
+	// ProfilePage schema — mark the About page as the canonical resource for the Person.
+	if ( is_page( 'about' ) ) {
+		$schemas[] = array(
+			'@context'   => 'https://schema.org',
+			'@type'      => 'ProfilePage',
+			'url'        => $ctx['url'],
+			'name'       => $ctx['title'],
+			'mainEntity' => array( '@id' => mbc_seo_person_id() ),
+		);
+	}
 
 	// WebSite schema — always output.
 	$schemas[] = array(
@@ -353,8 +517,19 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 
 	// BlogPosting schema — single journal posts.
 	if ( is_singular( 'post' ) && $ctx['post'] instanceof WP_Post ) {
-		$post      = $ctx['post'];
-		$author_id = (int) $post->post_author;
+		$post = $ctx['post'];
+
+		$publisher = array(
+			'@type' => 'Organization',
+			'@id'   => mbc_seo_organization_id(),
+			'name'  => $ctx['site_name'],
+			'url'   => home_url( '/' ),
+		);
+
+		$logo = mbc_seo_get_publisher_logo();
+		if ( null !== $logo ) {
+			$publisher['logo'] = $logo;
+		}
 
 		$article = array(
 			'@context'         => 'https://schema.org',
@@ -365,15 +540,9 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 			'datePublished'    => get_the_date( 'c', $post ),
 			'dateModified'     => get_the_modified_date( 'c', $post ),
 			'author'           => array(
-				'@type' => 'Person',
-				'name'  => get_the_author_meta( 'display_name', $author_id ),
-				'url'   => get_author_posts_url( $author_id ),
+				'@id' => mbc_seo_person_id(),
 			),
-			'publisher'        => array(
-				'@type' => 'Organization',
-				'name'  => $ctx['site_name'],
-				'url'   => home_url( '/' ),
-			),
+			'publisher'        => $publisher,
 			'mainEntityOfPage' => array(
 				'@type' => 'WebPage',
 				'@id'   => get_permalink( $post ),
