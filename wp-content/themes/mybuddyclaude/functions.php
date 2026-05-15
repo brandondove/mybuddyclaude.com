@@ -46,12 +46,12 @@ add_action( 'after_setup_theme', 'mybuddyclaude_setup' );
  * Build the Google Fonts CSS URL.
  *
  * Variants trimmed to what the theme actually uses:
- * Fraunces 400/600/700, Plus Jakarta Sans 400/500/600/700, JetBrains Mono 400/500.
- * Italics dropped — there is one `<em>` in the hero and browsers synthesize
- * italic acceptably for that case; saves three font requests on every page.
+ * Fraunces 400/600/700 + italic 700 (for the hero `<em>`),
+ * Plus Jakarta Sans 400/500/600/700, JetBrains Mono 400/500.
+ * Plus Jakarta italic dropped — no italic usage outside the Fraunces hero.
  */
 function mybuddyclaude_google_fonts_url(): string {
-	return 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap';
+	return 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap';
 }
 
 /**
