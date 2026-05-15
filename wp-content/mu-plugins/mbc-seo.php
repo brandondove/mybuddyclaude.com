@@ -139,8 +139,10 @@ function mbc_seo_set_image( array &$ctx, int $post_id ): void {
 		$ctx['image_width']  = (int) ( $image_meta['width'] ?? 0 );
 		$ctx['image_height'] = (int) ( $image_meta['height'] ?? 0 );
 	}
-	$alt              = get_post_meta( (int) $thumbnail_id, '_wp_attachment_image_alt', true );
-	$ctx['image_alt'] = is_string( $alt ) && '' !== $alt ? $alt : $ctx['title'];
+	$alt = get_post_meta( (int) $thumbnail_id, '_wp_attachment_image_alt', true );
+	if ( is_string( $alt ) && '' !== $alt ) {
+		$ctx['image_alt'] = $alt;
+	}
 }
 
 /**
@@ -262,10 +264,12 @@ function mbc_seo_output_open_graph( array $ctx ): void {
 				(int) $ctx['image_height']
 			);
 		}
-		printf(
-			'<meta property="og:image:alt" content="%s" />' . "\n",
-			esc_attr( $ctx['image_alt'] )
-		);
+		if ( '' !== $ctx['image_alt'] ) {
+			printf(
+				'<meta property="og:image:alt" content="%s" />' . "\n",
+				esc_attr( $ctx['image_alt'] )
+			);
+		}
 	}
 }
 
@@ -305,9 +309,37 @@ function mbc_seo_output_twitter_card( array $ctx ): void {
 			'<meta name="twitter:image" content="%s" />' . "\n",
 			esc_url( $ctx['image_url'] )
 		);
+		if ( '' !== $ctx['image_alt'] ) {
+			printf(
+				'<meta name="twitter:image:alt" content="%s" />' . "\n",
+				esc_attr( $ctx['image_alt'] )
+			);
+		}
+	}
+
+	/**
+	 * Filter the Twitter `site` handle (e.g. @mybuddyclaude).
+	 *
+	 * @param string $handle Twitter handle including the leading @, or empty to omit.
+	 */
+	$twitter_site = (string) apply_filters( 'mbc_seo_twitter_site', '' );
+	if ( '' !== $twitter_site ) {
 		printf(
-			'<meta name="twitter:image:alt" content="%s" />' . "\n",
-			esc_attr( $ctx['image_alt'] )
+			'<meta name="twitter:site" content="%s" />' . "\n",
+			esc_attr( $twitter_site )
+		);
+	}
+
+	/**
+	 * Filter the Twitter `creator` handle for the page author.
+	 *
+	 * @param string $handle Twitter handle including the leading @, or empty to omit.
+	 */
+	$twitter_creator = (string) apply_filters( 'mbc_seo_twitter_creator', '' );
+	if ( '' !== $twitter_creator ) {
+		printf(
+			'<meta name="twitter:creator" content="%s" />' . "\n",
+			esc_attr( $twitter_creator )
 		);
 	}
 }
