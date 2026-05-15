@@ -470,6 +470,95 @@ function mbc_seo_get_about_url(): string {
 	return '';
 }
 
+/**
+ * Build a CollectionPage schema node for journal, tools, and tool category archives.
+ *
+ * Lists the most recent items via `hasPart` so Google can resolve the
+ * collection's contents without crawling every paginated archive page.
+ *
+ * @param array $ctx SEO context.
+ * @return array<string,mixed>|null
+ */
+function mbc_seo_get_collection_page_schema( array $ctx ): ?array {
+	$query_args = null;
+	$name       = '';
+
+	if ( is_home() ) {
+		$query_args = array(
+			'post_type'      => 'post',
+			'posts_per_page' => 20,
+			'post_status'    => 'publish',
+		);
+		$name       = $ctx['title'] !== '' ? $ctx['title'] : 'Journal';
+	} elseif ( is_post_type_archive( 'mbc_tool' ) ) {
+		$query_args = array(
+			'post_type'      => 'mbc_tool',
+			'posts_per_page' => 50,
+			'post_status'    => 'publish',
+		);
+		$name       = $ctx['title'] !== '' ? $ctx['title'] : 'Tools';
+	} elseif ( is_tax( 'tool_category' ) ) {
+		$term = get_queried_object();
+		if ( ! $term instanceof WP_Term ) {
+			return null;
+		}
+		$query_args = array(
+			'post_type'      => 'mbc_tool',
+			'posts_per_page' => 50,
+			'post_status'    => 'publish',
+			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				array(
+					'taxonomy' => 'tool_category',
+					'field'    => 'term_id',
+					'terms'    => $term->term_id,
+				),
+			),
+		);
+		$name       = $term->name;
+	}
+
+	if ( null === $query_args ) {
+		return null;
+	}
+
+	$posts = get_posts( $query_args );
+
+	$collection = array(
+		'@context' => 'https://schema.org',
+		'@type'    => 'CollectionPage',
+		'name'     => $name,
+		'url'      => $ctx['url'],
+	);
+
+	if ( '' !== $ctx['description'] ) {
+		$collection['description'] = $ctx['description'];
+	}
+
+	if ( ! empty( $posts ) ) {
+		$collection['hasPart'] = array_map(
+			static function ( WP_Post $item ): array {
+				$is_post = 'post' === $item->post_type;
+				$part    = array(
+					'@type'         => $is_post ? 'BlogPosting' : 'SoftwareApplication',
+					'name'          => get_the_title( $item ),
+					'headline'      => get_the_title( $item ),
+					'url'           => get_permalink( $item ),
+					'datePublished' => get_the_date( 'c', $item ),
+					'dateModified'  => get_the_modified_date( 'c', $item ),
+					'author'        => array( '@id' => mbc_seo_person_id() ),
+				);
+				if ( '' !== (string) $item->post_excerpt ) {
+					$part['description'] = wp_strip_all_tags( $item->post_excerpt );
+				}
+				return $part;
+			},
+			$posts
+		);
+	}
+
+	return $collection;
+}
+
 // =========================================================================
 // OUTPUT: JSON-LD STRUCTURED DATA
 // =========================================================================
@@ -539,6 +628,7 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 			'url'              => get_permalink( $post ),
 			'datePublished'    => get_the_date( 'c', $post ),
 			'dateModified'     => get_the_modified_date( 'c', $post ),
+			'inLanguage'       => str_replace( '_', '-', (string) get_locale() ),
 			'author'           => array(
 				'@id' => mbc_seo_person_id(),
 			),
@@ -548,6 +638,30 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 				'@id'   => get_permalink( $post ),
 			),
 		);
+
+		$categories = get_the_category( $post->ID );
+		if ( ! empty( $categories ) ) {
+			$section_names = array_map(
+				static fn( WP_Term $term ): string => $term->name,
+				$categories
+			);
+			$article['articleSection'] = count( $section_names ) === 1
+				? $section_names[0]
+				: array_values( $section_names );
+		}
+
+		$tags = get_the_tags( $post->ID );
+		if ( is_array( $tags ) && ! empty( $tags ) ) {
+			$article['keywords'] = implode(
+				', ',
+				array_map( static fn( WP_Term $term ): string => $term->name, $tags )
+			);
+		}
+
+		$word_count = str_word_count( wp_strip_all_tags( (string) $post->post_content ) );
+		if ( $word_count > 0 ) {
+			$article['wordCount'] = $word_count;
+		}
 
 		if ( '' !== $ctx['image_url'] ) {
 			$article['image'] = array(
@@ -573,7 +687,18 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 			'name'                => get_the_title( $post ),
 			'description'         => $ctx['description'],
 			'url'                 => get_permalink( $post ),
-			'applicationCategory' => 'WebApplication',
+			'applicationCategory' => 'DeveloperApplication',
+			'operatingSystem'     => 'Web',
+			'inLanguage'          => str_replace( '_', '-', (string) get_locale() ),
+			'creator'             => array( '@id' => mbc_seo_person_id() ),
+			'publisher'           => array( '@id' => mbc_seo_organization_id() ),
+			'dateCreated'         => get_the_date( 'c', $post ),
+			'dateModified'        => get_the_modified_date( 'c', $post ),
+			'offers'              => array(
+				'@type'         => 'Offer',
+				'price'         => '0',
+				'priceCurrency' => 'USD',
+			),
 		);
 
 		if ( is_string( $tool_url ) && '' !== $tool_url ) {
@@ -594,6 +719,12 @@ function mbc_seo_output_json_ld( array $ctx ): void {
 		}
 
 		$schemas[] = $tool;
+	}
+
+	// CollectionPage schema — journal index, tools archive, and tool category archives.
+	$collection = mbc_seo_get_collection_page_schema( $ctx );
+	if ( null !== $collection ) {
+		$schemas[] = $collection;
 	}
 
 	// BreadcrumbList schema — all non-front-page views.
