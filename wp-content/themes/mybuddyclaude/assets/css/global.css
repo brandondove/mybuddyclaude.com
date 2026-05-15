@@ -68,9 +68,6 @@ video {
 .site-header .wp-block-site-tagline {
 	color: var(--wp--preset--color--muted);
 	font-size: var(--wp--preset--font-size--sm);
-	border-left: 1px solid var(--wp--preset--color--border);
-	padding-left: 1rem;
-	margin-left: 0.5rem;
 }
 
 /* Navigation */
