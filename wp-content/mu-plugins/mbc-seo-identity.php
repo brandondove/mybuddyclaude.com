@@ -28,3 +28,22 @@ add_filter(
 		);
 	}
 );
+
+/**
+ * Twitter / X handle representing the site itself.
+ *
+ * The site doesn't have a dedicated account yet — falls back to the author handle
+ * so Twitter card attributions still resolve. Update when a site account exists.
+ */
+add_filter(
+	'mbc_seo_twitter_site',
+	static fn(): string => '@brandondove'
+);
+
+/**
+ * Twitter / X handle for the page author.
+ */
+add_filter(
+	'mbc_seo_twitter_creator',
+	static fn(): string => '@brandondove'
+);
