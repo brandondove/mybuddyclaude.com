@@ -43,14 +43,24 @@ function mybuddyclaude_setup(): void {
 add_action( 'after_setup_theme', 'mybuddyclaude_setup' );
 
 /**
+ * Build the Google Fonts CSS URL.
+ *
+ * Variants trimmed to what the theme actually uses:
+ * Fraunces 400/600/700, Plus Jakarta Sans 400/500/600/700, JetBrains Mono 400/500.
+ * Italics dropped — there is one `<em>` in the hero and browsers synthesize
+ * italic acceptably for that case; saves three font requests on every page.
+ */
+function mybuddyclaude_google_fonts_url(): string {
+	return 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap';
+}
+
+/**
  * Enqueue Google Fonts.
  */
 function mybuddyclaude_enqueue_fonts(): void {
-	$font_url = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap';
-
 	wp_enqueue_style(
 		'mybuddyclaude-fonts',
-		$font_url,
+		mybuddyclaude_google_fonts_url(),
 		array(),
 		null
 	);
@@ -58,6 +68,63 @@ function mybuddyclaude_enqueue_fonts(): void {
 add_action( 'wp_enqueue_scripts', 'mybuddyclaude_enqueue_fonts' );
 add_action( 'admin_enqueue_scripts', 'mybuddyclaude_enqueue_fonts' );
 add_action( 'enqueue_block_editor_assets', 'mybuddyclaude_enqueue_fonts' );
+
+/**
+ * Preconnect to the Google Fonts origins so the browser can warm TLS
+ * before the fonts stylesheet is requested. Frontend only — the editor
+ * doesn't benefit from this and adding it there spams the editor head.
+ *
+ * @param string[] $urls          Resource URLs.
+ * @param string   $relation_type Resource hint relation.
+ * @return string[]
+ */
+function mybuddyclaude_resource_hints( array $urls, string $relation_type ): array {
+	if ( is_admin() ) {
+		return $urls;
+	}
+	if ( 'preconnect' === $relation_type ) {
+		$urls[] = array(
+			'href' => 'https://fonts.googleapis.com',
+		);
+		$urls[] = array(
+			'href'        => 'https://fonts.gstatic.com',
+			'crossorigin' => 'anonymous',
+		);
+	}
+	return $urls;
+}
+add_filter( 'wp_resource_hints', 'mybuddyclaude_resource_hints', 10, 2 );
+
+/**
+ * Load the Google Fonts stylesheet without blocking render.
+ *
+ * Uses the `media="print"` swap pattern: the browser fetches the stylesheet
+ * with a non-applicable media query (no blocking), then we flip it to `all`
+ * via onload. A `<noscript>` fallback handles JS-disabled clients.
+ *
+ * Frontend only — the block editor needs fonts loaded synchronously so the
+ * canvas renders correctly.
+ *
+ * @param string $html Original stylesheet tag.
+ * @param string $handle Enqueue handle.
+ * @return string
+ */
+function mybuddyclaude_async_fonts_tag( string $html, string $handle ): string {
+	if ( 'mybuddyclaude-fonts' !== $handle || is_admin() ) {
+		return $html;
+	}
+
+	$async_tag = str_replace(
+		array( "media='all'", 'media="all"' ),
+		'media="print" onload="this.media=\'all\';this.onload=null;"',
+		$html
+	);
+
+	$noscript = '<noscript>' . $html . '</noscript>';
+
+	return $async_tag . $noscript;
+}
+add_filter( 'style_loader_tag', 'mybuddyclaude_async_fonts_tag', 10, 2 );
 
 /**
  * Enqueue theme styles.
@@ -86,7 +153,7 @@ function mybuddyclaude_editor_styles(): void {
 	add_editor_style(
 		array(
 			'assets/css/global.css',
-			'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap',
+			mybuddyclaude_google_fonts_url(),
 		)
 	);
 }
