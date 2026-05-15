@@ -49,10 +49,6 @@ video {
 	-webkit-backdrop-filter: blur(12px);
 }
 
-.site-header .wp-block-group {
-	align-items: center;
-}
-
 /* Site title / logo */
 .wp-block-site-title a {
 	text-decoration: none;
